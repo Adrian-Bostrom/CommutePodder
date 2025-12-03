@@ -1,7 +1,10 @@
+import { model } from "./model"
+import { LoginPresenter } from "./presenters/loginPresenter"
+
 function App() {
   return (
     <>
-      <div>hej värld</div>
+      <LoginPresenter model={model} />
     </>
   )
 }
