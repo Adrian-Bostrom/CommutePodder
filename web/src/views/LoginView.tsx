@@ -31,10 +31,10 @@ export default function LoginView() {
                                 placeholder="••••••••"
                             />
                         </div>
-                        
+                         
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
                         >
                             Sign In
                         </button>
