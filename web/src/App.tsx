@@ -1,4 +1,4 @@
-import { model } from "./model"
+// import { model } from "./model"
 import { LoginPresenter } from "./presenters/LoginPresenter"
 import { NavbarPresenter } from "./presenters/navbarPresenter"
 import { TravelInfoPresenter } from "./presenters/TravelInfoPresenter"
