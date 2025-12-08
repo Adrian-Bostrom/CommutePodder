@@ -1,4 +1,4 @@
-interface TravelInfo {
+export interface TravelInfo {
     id: number;
     line: string;
     destination: string;
