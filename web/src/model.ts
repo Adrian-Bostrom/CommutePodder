@@ -1,1 +1,2 @@
-export const model = {}
+export const model = {
+}

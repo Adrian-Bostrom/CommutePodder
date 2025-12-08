@@ -1,6 +1,7 @@
 import { model } from "./model"
-import { LoginPresenter } from "./presenters/loginPresenter"
+import { LoginPresenter } from "./presenters/LoginPresenter"
 import { NavbarPresenter } from "./presenters/navbarPresenter"
+import { TravelInfoPresenter } from "./presenters/TravelInfoPresenter"
 import { Routes, Route } from "react-router-dom";
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
       <NavbarPresenter/>
       <Routes>
         <Route path="/" element={<LoginPresenter />} />
+        <Route path="/travel" element={<TravelInfoPresenter />} />
       </Routes>
     </>
   )
