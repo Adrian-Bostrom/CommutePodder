@@ -1,12 +1,51 @@
 import { Request, Response } from 'express';
 
-export const getTravelInfo = (req: Request, res: Response) => {
-    // Mock data for SL travel info
-    const travelData = [
-        { id: 1, line: '14', destination: 'Fruängen', time: '10 min', type: 'Metro' },
-        { id: 2, line: '13', destination: 'Norsborg', time: '12 min', type: 'Metro' },
-        { id: 3, line: '4', destination: 'Radiohuset', time: '5 min', type: 'Bus' },
-        { id: 4, line: '14', destination: 'Mörby Centrum', time: '2 min', type: 'Metro' }
-    ];
-    res.json(travelData);
+export const getTravelInfo = async (req: Request, res: Response) => {
+    try {
+        // Mock data for SL travel info
+        const response = await fetchSLTrips({
+            originId: '9091001000009182',
+            destId: '9091001000009192'
+        });
+        console.log("made request", response)
+        res.json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch travel info' });
+    }
 };
+
+interface SLTripsOptions {
+  originId: string;
+  destId: string;
+  numberOfTrips?: number;
+  typeOrigin?: string;
+  typeDestination?: string;
+}
+
+export async function fetchSLTrips({
+  originId,
+  destId,
+  numberOfTrips = 3,
+  typeOrigin = 'any',
+  typeDestination = 'any'
+}: SLTripsOptions): Promise<any> {
+  const params = new URLSearchParams({
+    type_origin: typeOrigin,
+    type_destination: typeDestination,
+    name_origin: originId,
+    name_destination: destId,
+    calc_number_of_trips: numberOfTrips.toString(),
+  });
+  const url = `https://journeyplanner.integration.sl.se/v2/trips?${params.toString()}`;
+  console.log("this is the request url", url)
+
+  const response = await fetch(url);
+  console.log("response: ",response)
+  if (!response.ok) {
+    throw new Error(`SL API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+}
