@@ -38,10 +38,8 @@ export async function fetchSLTrips({
     calc_number_of_trips: numberOfTrips.toString(),
   });
   const url = `https://journeyplanner.integration.sl.se/v2/trips?${params.toString()}`;
-  console.log("this is the request url", url)
 
   const response = await fetch(url);
-  console.log("response: ",response)
   if (!response.ok) {
     throw new Error(`SL API error: ${response.status} ${response.statusText}`);
   }
