@@ -41,6 +41,38 @@ export const googleAuth = async (req: Request, res: Response) => {
       return;
     }
 
+    // Get Firestore instance
+    const db = admin.firestore();
+    const userRef = db.collection('users').doc(uid);
+    const userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      // Update existing user's last login
+      await userRef.update({
+        lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+        name: name || email.split('@')[0],
+        picture: picture || null
+      });
+      console.log(`Updated existing user: ${email}`);
+    } else {
+      // Create new user
+      const newUser = {
+        uid,
+        email,
+        name: name || email.split('@')[0],
+        picture: picture || null,
+        favouritePods: [],
+        currentPod: 0,
+        routeHistory: [],
+        currentRoute: { startId: 0, endId: 0 },
+        favouriteRoutes: [],
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastLogin: admin.firestore.FieldValue.serverTimestamp()
+      };
+      await userRef.set(newUser);
+      console.log(`Created new user: ${email}`);
+    }
+
     generateJWT(res, uid);
 
     res.status(200).json({
