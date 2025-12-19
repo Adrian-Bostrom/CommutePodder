@@ -1,13 +1,36 @@
 import axios from 'axios';
+import { Request, Response } from 'express';
 
-const BASE_URL = 'https://listen-api-test.listennotes.com/api/v2/search';
-const API_KEY = process.env.LISTENNOTES_API_KEY; // set this in your backend .env
+const BASE_URL = 'https://listen-api.listennotes.com/api/v2/search';
 
-if (!API_KEY) {
-  console.warn(
-    'U dont have an api key set, this means you cannot run this website as it cannot get the right data.'
-  );
-}
+export const searchPodcasts = async (req: Request, res: Response) => {
+    try {
+        const { q, duration } = req.query;
+
+        
+        const params: SearchParams = {
+            q: (q as string) || 'podcast',
+            type: 'episode',
+            language: 'English',
+            sort_by_date: 0,
+            unique_podcasts: 1,
+        };
+
+        if (duration) {
+            const dur = parseInt(duration as string);
+            if (!isNaN(dur)) {
+                params.len_max = dur;
+                params.len_min = Math.max(5, dur - 10); // 10 mins buffer, min 5 mins
+            }
+        }
+
+        const data = await getPodcasts(params);
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch podcasts' });
+    }
+};
 
 export type SearchParams = {
   q: string;
@@ -40,9 +63,14 @@ export async function getPodcasts(params: SearchParams) {
   const url = `${BASE_URL}?${searchParams.toString()}`;
 
   try {
+    const apiKey = process.env.LISTENNOTES_API_KEY;
+    if (!apiKey) {
+        console.warn('LISTENNOTES_API_KEY is missing in environment variables');
+    }
+
     const resp = await axios.get(url, {
       headers: {
-        'X-ListenAPI-Key': API_KEY ?? '',
+        'X-ListenAPI-Key': apiKey ?? '',
         Accept: 'application/json',
       },
       timeout: 10_000, // 10s timeout

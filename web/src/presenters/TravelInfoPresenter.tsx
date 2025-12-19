@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TravelInfoView } from '../views/TravelInfoView';
 import type { TravelInfo, Stop } from '../views/TravelInfoView';
 
 export const TravelInfoPresenter = () => {
+    const navigate = useNavigate();
     const [travelData, setTravelData] = useState<TravelInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -148,6 +150,21 @@ export const TravelInfoPresenter = () => {
         setToResults([]);
     };
 
+    const handleSelectTrip = (trip: TravelInfo) => {
+        // Parse duration string "1h 30m" or "45m" to minutes
+        let minutes = 0;
+        const parts = trip.duration.split(' ');
+        for (const part of parts) {
+            if (part.endsWith('h')) {
+                minutes += parseInt(part) * 60;
+            } else if (part.endsWith('m')) {
+                minutes += parseInt(part);
+            }
+        }
+        
+        navigate('/podcasts', { state: { duration: minutes } });
+    };
+
     return <TravelInfoView 
         travelData={travelData} 
         loading={loading} 
@@ -165,5 +182,6 @@ export const TravelInfoPresenter = () => {
         searchTime={searchTime}
         setSearchTime={setSearchTime}
         onSearch={handleSearch}
+        onSelectTrip={handleSelectTrip}
     />;
 };

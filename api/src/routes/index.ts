@@ -4,6 +4,7 @@ import travelRoutes from './travelRoutes.js';
 import stopRoutes from './stopRoutes.js';
 import userRoutes from './usersRoute.js';
 import authRoutes from './authRoutes.js';
+import podcastRoutes from './podcastRoutes.js';
 
 const router = Router();
 
@@ -12,8 +13,6 @@ router.use('/travel', travelRoutes);
 router.use('/stops', stopRoutes);
 router.use('/users', userRoutes);
 router.use('/auth', authRoutes);
-
-// Add more route modules here
-// router.use('/podcasts', podcastRoutes);
+router.use('/podcasts', podcastRoutes);
 
 export default router;

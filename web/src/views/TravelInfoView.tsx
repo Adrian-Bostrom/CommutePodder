@@ -40,13 +40,15 @@ interface TravelInfoViewProps {
     searchTime: string;
     setSearchTime: (val: string) => void;
     onSearch: () => void;
+    onSelectTrip: (trip: TravelInfo) => void;
 }
 
 export const TravelInfoView = ({ 
     travelData, loading, error,
     fromSearch, setFromSearch, fromResults, onSelectFrom,
     toSearch, setToSearch, toResults, onSelectTo,
-    searchDate, setSearchDate, searchTime, setSearchTime, onSearch
+    searchDate, setSearchDate, searchTime, setSearchTime, onSearch,
+    onSelectTrip
 }: TravelInfoViewProps) => {
     // if (loading) return <div className="p-4">Loading travel info...</div>; // Move loading inside to allow search while loading? Or just keep it simple.
     // If I return early, I can't see the search bar if it's loading initial data.
@@ -170,6 +172,14 @@ export const TravelInfoView = ({
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                        <div className="mt-4 text-right">
+                            <button 
+                                onClick={() => onSelectTrip(trip)}
+                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            >
+                                Select Trip
+                            </button>
                         </div>
                     </div>
                 ))}

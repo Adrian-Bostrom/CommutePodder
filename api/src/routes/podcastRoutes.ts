@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getPodcasts } from '../controllers/PodcastController';
+import { searchPodcasts } from '../controllers/PodcastController.js';
 
 const router = Router();
 
-router.get('/', getPodcasts);
+router.get('/', searchPodcasts);
 
 export default router;
