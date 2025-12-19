@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoginView from "../views/LoginView";
 import { signInWithGoogle, signOutUser } from '../services/googleAuth';
 
 export function LoginPresenter() {
+    const navigate = useNavigate();
     const [user, setUser] = useState<any>(null);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState(false);
@@ -32,6 +34,10 @@ export function LoginPresenter() {
         }
     };
 
+    const handleGuestLogin = () => {
+        navigate('/travel');
+    };
+
     return (
         <LoginView
             user={user}
@@ -39,6 +45,7 @@ export function LoginPresenter() {
             loading={loading}
             onGoogleSignIn={handleGoogleSignIn}
             onSignOut={handleSignOut}
+            onGuestLogin={handleGuestLogin}
         />
     );
 }
