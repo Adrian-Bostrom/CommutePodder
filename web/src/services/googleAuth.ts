@@ -47,4 +47,22 @@ export const signOutUser = async () => {
   }
 };
 
+export const getCurrentUser = async () => {
+  try {
+    const response = await fetch('/api/auth/me', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get current user error:', error);
+    return null;
+  }
+};
+
 export { auth };

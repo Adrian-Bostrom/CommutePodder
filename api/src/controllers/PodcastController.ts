@@ -2,6 +2,32 @@ import axios from 'axios';
 import { Request, Response } from 'express';
 
 const BASE_URL = 'https://listen-api.listennotes.com/api/v2/search';
+const EPISODE_URL = 'https://listen-api.listennotes.com/api/v2/episodes';
+
+export const getEpisode = async (req: Request, res: Response) => {
+    const { id } = req.query;
+
+    if (!id || typeof id !== 'string') {
+        return res.status(400).json({ error: 'Episode ID is required' });
+    }
+
+    try {
+        const apiKey = process.env.LISTENNOTES_API_KEY;
+        const url = `${EPISODE_URL}/${id}`;
+
+        const resp = await axios.get(url, {
+            headers: {
+                'X-ListenAPI-Key': apiKey ?? '',
+                Accept: 'application/json',
+            },
+        });
+
+        res.json(resp.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch episode details' });
+    }
+};
 
 export const searchPodcasts = async (req: Request, res: Response) => {
     try {

@@ -8,6 +8,14 @@ interface LoginViewProps {
 }
 
 export default function LoginView({ user, error, loading, onGoogleSignIn, onSignOut, onGuestLogin }: LoginViewProps) {
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-gray-600">Loading...</div>
+            </div>
+        );
+    }
+
     if (user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export interface PodcastEpisode {
     id: string;
     title_original: string;
@@ -33,13 +35,17 @@ export const PodcastView = ({ podcasts, loading, error, targetDuration }: Podcas
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {podcasts.map((episode) => (
                         <div key={episode.id} className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
-                            <img 
-                                src={episode.image} 
-                                alt={episode.title_original} 
-                                className="w-full h-48 object-cover"
-                            />
+                            <Link to={`/podcast/${episode.id}`}>
+                                <img 
+                                    src={episode.image} 
+                                    alt={episode.title_original} 
+                                    className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
+                                />
+                            </Link>
                             <div className="p-4 flex-1 flex flex-col">
-                                <h3 className="font-bold text-lg mb-2 line-clamp-2">{episode.title_original}</h3>
+                                <Link to={`/podcast/${episode.id}`} className="hover:text-blue-600">
+                                    <h3 className="font-bold text-lg mb-2 line-clamp-2">{episode.title_original}</h3>
+                                </Link>
                                 <p className="text-sm text-gray-600 mb-2">{episode.podcast.title_original}</p>
                                 <div className="flex justify-between items-center mt-auto">
                                     <span className="text-sm font-semibold bg-gray-100 px-2 py-1 rounded">
@@ -67,3 +73,4 @@ export const PodcastView = ({ podcasts, loading, error, targetDuration }: Podcas
         </div>
     );
 };
+

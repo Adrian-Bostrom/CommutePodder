@@ -1,13 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginView from "../views/LoginView";
-import { signInWithGoogle, signOutUser } from '../services/googleAuth';
+import { signInWithGoogle, signOutUser, getCurrentUser } from '../services/googleAuth';
 
 export function LoginPresenter() {
     const navigate = useNavigate();
     const [user, setUser] = useState<any>(null);
     const [error, setError] = useState<string>('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = async () => {
+        try {
+            const userData = await getCurrentUser();
+            if (userData && userData.user) {
+                setUser(userData.user);
+            }
+        } catch (err) {
+            console.error('Auth check error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleGoogleSignIn = async () => {
         try {

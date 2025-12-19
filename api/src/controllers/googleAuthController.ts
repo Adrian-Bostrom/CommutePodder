@@ -110,3 +110,35 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
     res.status(401).json({ valid: false, message: 'Invalid token' });
   }
 };
+
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    
+    if (!userId) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const db = admin.firestore();
+    const userDoc = await db.collection('users').doc(userId).get();
+
+    if (!userDoc.exists) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const userData = userDoc.data();
+    res.status(200).json({
+      user: {
+        uid: userData?.uid,
+        email: userData?.email,
+        name: userData?.name,
+        picture: userData?.picture,
+      },
+    });
+  } catch (error) {
+    console.error('Get current user error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

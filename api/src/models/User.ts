@@ -3,7 +3,7 @@ export class User {
   email: string;
   name: string;
   picture?: string;
-  favouritePods: number[];
+  favouritePods: string[];
   currentPod: number;
   routeHistory: {startId: number, endId: number}[];
   currentRoute: {startId: number, endId: number};
@@ -16,7 +16,7 @@ export class User {
     email: string,
     name: string,
     picture?: string,
-    favouritePods?:  number[],
+    favouritePods?:  string[],
     currentPod?: number,
     routeHistory?: {startId: number, endId: number}[],
     currentRoute?: {startId: number, endId: number},
