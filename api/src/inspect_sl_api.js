@@ -5,6 +5,8 @@ const params = new URLSearchParams({
     name_origin: '9091001000009182',
     name_destination: '9091001000009192',
     calc_number_of_trips: '1',
+    itd_time: '1945',
+    itd_date: '20251220'
 });
 const url = `https://journeyplanner.integration.sl.se/v2/trips?${params.toString()}`;
 
