@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 
 export const getTravelInfo = async (req: Request, res: Response) => {
     try {
+        const { originId, destId } = req.query;
+        
         // Mock data for SL travel info
         const response = await fetchSLTrips({
-            originId: '9091001000009182',
-            destId: '9091001000009192'
+            originId: (originId as string) || '9091001000009182',
+            destId: (destId as string) || '9091001000009192'
         });
         console.log("made request", response)
         res.json(response);
