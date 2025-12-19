@@ -2,10 +2,26 @@ import { Request, Response } from 'express';
 import admin from 'firebase-admin';
 import { generateJWT } from '../utils/jwtSigning.js';
 import { getAuth } from 'firebase-admin/auth';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-// Initialize Firebase Admin if not already initialized
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 if (!admin.apps.length) {
-  admin.initializeApp();
+  try {
+    const serviceAccountPath = join(__dirname, '../../../serviceAccountKey.json');
+    const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('✅ Firebase Admin initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize Firebase Admin:', error);
+    admin.initializeApp();
+  }
 }
 
 export const googleAuth = async (req: Request, res: Response) => {
@@ -17,7 +33,6 @@ export const googleAuth = async (req: Request, res: Response) => {
       return;
     }
 
-    // Verify the Google ID token
     const decodedToken = await getAuth().verifyIdToken(idToken);
     const { uid, email, name, picture } = decodedToken;
 
@@ -26,7 +41,6 @@ export const googleAuth = async (req: Request, res: Response) => {
       return;
     }
 
-    // Generate JWT for session management
     generateJWT(res, uid);
 
     res.status(200).json({

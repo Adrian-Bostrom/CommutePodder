@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { User } from "./User";
-import { firebaseConfig } from "./firebaseConfig";
+import { firebaseConfig } from "../firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -80,7 +80,7 @@ export async function addUsers(users: User[]): Promise<void> {
 /**
  * Update an existing user in the database
  * @param updatedUser - The updated User instance
- * @returns Promise<void>
+ * @returns Promise
  */
 export async function updateUser(updatedUser: User): Promise<void> {
   try {
@@ -91,7 +91,6 @@ export async function updateUser(updatedUser: User): Promise<void> {
       const data = docSnap.data();
       const usersData = data.users || [];
       
-      // Find and update the user with matching uid
       const updatedUsers = usersData.map((userData: any) => {
         if (userData.uid === updatedUser.uid) {
           return updatedUser.toFirestore();
@@ -115,7 +114,7 @@ export async function updateUser(updatedUser: User): Promise<void> {
 /**
  * Delete a user from the database by uid
  * @param uid - The user ID to delete
- * @returns Promise<void>
+ * @returns Promise
  */
 export async function deleteUser(uid: number): Promise<void> {
   try {
@@ -126,7 +125,6 @@ export async function deleteUser(uid: number): Promise<void> {
       const data = docSnap.data();
       const usersData = data.users || [];
       
-      // Filter out the user with matching uid
       const filteredUsers = usersData.filter((userData: any) => userData.uid !== uid);
       
       await setDoc(firestoreDoc, {

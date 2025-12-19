@@ -6,6 +6,9 @@ node_modules/
 #emacs backup
 *~
 
+# Firebase Admin credentials
+serviceAccountKey.json
+
 .expo/
 dist/
 web-build/
