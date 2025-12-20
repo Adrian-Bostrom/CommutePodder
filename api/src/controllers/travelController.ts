@@ -68,6 +68,11 @@ export const getTravelInfo = async (req: Request, res: Response) => {
                         const userData = doc.data();
                         let history = userData?.routeHistory || [];
                         
+                        // Remove any existing entry with same start/end to move it to top (end of array)
+                        history = history.filter((item: any) => 
+                            String(item.startId) !== String(originId) || String(item.endId) !== String(destId)
+                        );
+
                         // Add new trip
                         history.push(trip);
                         
