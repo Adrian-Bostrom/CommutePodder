@@ -91,11 +91,7 @@ export const TravelInfoView = ({
         }
 
         if (lowerType.includes('bus')) {
-            // Blue buses (Stombussar) - usually 1-4, 6, and some 17x, 47x, 87x etc.
-            // Simplified check for single digit 1-6 (except 5 which is usually red)
-            if ([1, 2, 3, 4, 6].includes(lineNumber)) return 'bg-blue-700 text-white';
-            // Check for 172, 173, etc if needed, but standard red is fine for default
-            return 'bg-red-500 text-white';
+            return 'bg-gray-800 text-white';
         }
 
         if (lowerType.includes('ferry') || lowerType.includes('båt')) {
