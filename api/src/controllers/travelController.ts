@@ -87,7 +87,24 @@ export const getTravelInfo = async (req: Request, res: Response) => {
             }
         }
 
-        console.log("made request", response)
+        // Simplified logging
+        const userLabel = userId ? `User: ${userId}` : 'User: Guest';
+        let routeLabel = `between ${originId} and ${destId}`;
+        
+        // Try to get names from response if available
+        if (response && response.journeys && response.journeys.length > 0) {
+             const firstTrip = response.journeys[0];
+             if (firstTrip.legs && firstTrip.legs.length > 0) {
+                 const startName = firstTrip.legs[0].origin?.name;
+                 const endName = firstTrip.legs[firstTrip.legs.length - 1].destination?.name;
+                 if (startName && endName) {
+                     routeLabel = `between ${startName} and ${endName}`;
+                 }
+             }
+        }
+        
+        console.log(`${userLabel} searched for a trip ${routeLabel}`);
+        
         res.json(response);
     } catch (error) {
         console.error(error);

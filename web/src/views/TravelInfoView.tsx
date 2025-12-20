@@ -5,6 +5,7 @@ export interface Leg {
     time: string;
     type: string;
     origin: string;
+    waitTime?: string;
 }
 
 export interface TravelInfo {
@@ -51,6 +52,10 @@ interface TravelInfoViewProps {
 
     recentTrips: RecentTrip[];
     onSelectRecentTrip: (trip: RecentTrip) => void;
+
+    favoriteRoutes?: RecentTrip[];
+    onToggleFavorite?: () => void;
+    isCurrentRouteFavorite?: boolean;
 }
 
 export const TravelInfoView = ({ 
@@ -58,15 +63,51 @@ export const TravelInfoView = ({
     fromSearch, setFromSearch, fromResults, onSelectFrom,
     toSearch, setToSearch, toResults, onSelectTo,
     searchDate, setSearchDate, searchTime, setSearchTime, onSearch,
-    onSelectTrip, recentTrips, onSelectRecentTrip
+    onSelectTrip, recentTrips, onSelectRecentTrip,
+    favoriteRoutes = [], onToggleFavorite, isCurrentRouteFavorite = false
 }: TravelInfoViewProps) => {
-    // if (loading) return <div className="p-4">Loading travel info...</div>; // Move loading inside to allow search while loading? Or just keep it simple.
-    // If I return early, I can't see the search bar if it's loading initial data.
-    // I'll remove the early return for loading/error and render them conditionally below the search bar.
+    
+    const getLineColor = (type: string, line: string) => {
+        const lineNumber = parseInt(line);
+        const lowerType = type.toLowerCase();
+
+        if (lowerType.includes('metro') || lowerType.includes('t-bana') || lowerType.includes('tunnelbana')) {
+            if ([10, 11].includes(lineNumber)) return 'bg-blue-600 text-white'; // Blue line
+            if ([13, 14].includes(lineNumber)) return 'bg-red-600 text-white'; // Red line
+            if ([17, 18, 19].includes(lineNumber)) return 'bg-green-600 text-white'; // Green line
+            return 'bg-blue-800 text-white'; // Fallback Metro
+        }
+        
+        if (lowerType.includes('commuter') || lowerType.includes('pendeltåg') || lowerType.includes('train')) {
+            return 'bg-pink-600 text-white';
+        }
+
+        if (lowerType.includes('tram') || lowerType.includes('spårvagn') || lowerType.includes('lokalbana')) {
+            if (lineNumber === 7) return 'bg-gray-500 text-white';
+            if (lineNumber === 12) return 'bg-gray-500 text-white'; // Nockebybanan
+            if (lineNumber === 21) return 'bg-orange-600 text-white'; // Lidingöbanan
+            if (lineNumber === 22) return 'bg-orange-600 text-white'; // Tvärbanan
+            return 'bg-gray-500 text-white';
+        }
+
+        if (lowerType.includes('bus')) {
+            // Blue buses (Stombussar) - usually 1-4, 6, and some 17x, 47x, 87x etc.
+            // Simplified check for single digit 1-6 (except 5 which is usually red)
+            if ([1, 2, 3, 4, 6].includes(lineNumber)) return 'bg-blue-700 text-white';
+            // Check for 172, 173, etc if needed, but standard red is fine for default
+            return 'bg-red-500 text-white';
+        }
+
+        if (lowerType.includes('ferry') || lowerType.includes('båt')) {
+            return 'bg-blue-400 text-white';
+        }
+
+        return 'bg-gray-200 text-gray-700'; // Walk or other
+    };
 
     return (
-        <div className="p-4">
-            <h2 className="text-2xl font-bold mb-4">SL Travel Information</h2>
+        <div className="p-4 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Plan Your Trip</h2>
             
             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
@@ -138,44 +179,85 @@ export const TravelInfoView = ({
                     />
                 </div>
                 <div>
-                    <button 
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                        onClick={onSearch}
-                    >
-                        Search Trips
-                    </button>
+                    <div className="flex gap-2">
+                        <button 
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-1"
+                            onClick={onSearch}
+                        >
+                            Search Trips
+                        </button>
+                        {onToggleFavorite && (
+                            <button
+                                className={`font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isCurrentRouteFavorite ? 'bg-yellow-400 hover:bg-yellow-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'}`}
+                                onClick={onToggleFavorite}
+                                title={isCurrentRouteFavorite ? "Remove from favorites" : "Add to favorites"}
+                            >
+                                ★
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
             {loading && <div className="p-4">Loading travel info...</div>}
             {error && <div className="p-4 text-red-500">Error: {error}</div>}
 
-            {!loading && travelData.length === 0 && recentTrips.length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-xl font-semibold mb-4">Recent Trips</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {recentTrips.slice().reverse().slice(0, 4).map((trip, index) => (
-                            <div 
-                                key={index} 
-                                className="bg-white p-4 rounded-lg shadow hover:shadow-md cursor-pointer border border-gray-200 transition-all hover:border-blue-300"
-                                onClick={() => onSelectRecentTrip(trip)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                        <div className="font-medium text-gray-900">{trip.startName}</div>
-                                        <div className="text-gray-400 text-sm my-1">↓</div>
-                                        <div className="font-medium text-gray-900">{trip.endName}</div>
+            {!loading && travelData.length === 0 && (
+                <>
+                    {favoriteRoutes && favoriteRoutes.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-xl font-semibold mb-4">Favorite Trips</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {favoriteRoutes.map((trip, index) => (
+                                    <div 
+                                        key={index} 
+                                        className="bg-yellow-50 p-4 rounded-lg shadow hover:shadow-md cursor-pointer border border-yellow-200 transition-all hover:border-yellow-400"
+                                        onClick={() => onSelectRecentTrip(trip)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <div className="font-medium text-gray-900">{trip.startName}</div>
+                                                <div className="text-gray-400 text-sm my-1">↓</div>
+                                                <div className="font-medium text-gray-900">{trip.endName}</div>
+                                            </div>
+                                            <div className="text-yellow-500 text-xl">
+                                                ★
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-blue-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </div>
+                    )}
+
+                    {recentTrips.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-xl font-semibold mb-4">Recent Trips</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {recentTrips.slice().reverse().slice(0, 4).map((trip, index) => (
+                                    <div 
+                                        key={index} 
+                                        className="bg-white p-4 rounded-lg shadow hover:shadow-md cursor-pointer border border-gray-200 transition-all hover:border-blue-300"
+                                        onClick={() => onSelectRecentTrip(trip)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <div className="font-medium text-gray-900">{trip.startName}</div>
+                                                <div className="text-gray-400 text-sm my-1">↓</div>
+                                                <div className="font-medium text-gray-900">{trip.endName}</div>
+                                            </div>
+                                            <div className="text-blue-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
 
             {!loading && !error && (
@@ -195,17 +277,36 @@ export const TravelInfoView = ({
                         
                         <div className="space-y-2">
                             {trip.legs.map((leg, idx) => (
-                                <div key={idx} className="flex items-center p-2 bg-gray-50 rounded">
-                                    <div className="w-16 text-sm font-bold text-gray-600">
-                                        {leg.time}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="font-semibold">
-                                            {leg.type} {leg.line !== 'Unknown' && leg.line}
-                                            {leg.direction && <span className="text-gray-500 font-normal text-sm ml-1">towards {leg.direction}</span>}
+                                <div key={idx}>
+                                    {leg.waitTime && (
+                                        <div className="pl-32 py-1 text-xs text-gray-500 flex items-center">
+                                            <span className="mr-1">⏱</span>
+                                            <span>{leg.waitTime} transfer</span>
                                         </div>
-                                        <div className="text-sm text-gray-600">
-                                            From {leg.origin} to {leg.destination}
+                                    )}
+                                    <div className="flex items-center p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
+                                        <div className="w-28 text-sm font-bold text-gray-600 flex-shrink-0">
+                                            {leg.time}
+                                        </div>
+                                        <div className="flex-1 flex items-center min-w-0">
+                                            <div className={`flex-shrink-0 w-12 h-8 flex items-center justify-center rounded font-bold text-sm mr-3 ${getLineColor(leg.type, leg.line)}`}>
+                                                {leg.type === 'Walk' ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                    </svg>
+                                                ) : (
+                                                    leg.line
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-semibold truncate">
+                                                    {leg.type === 'Walk' ? 'Walk' : `To ${leg.destination}`}
+                                                    {leg.direction && leg.type !== 'Walk' && <span className="text-gray-500 font-normal text-sm ml-1 hidden sm:inline">towards {leg.direction}</span>}
+                                                </div>
+                                                <div className="text-xs text-gray-500 truncate">
+                                                    From: {leg.origin}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

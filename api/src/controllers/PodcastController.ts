@@ -22,6 +22,9 @@ export const getEpisode = async (req: Request, res: Response) => {
             },
         });
 
+        const userId = (req as any).userId;
+        console.log(`User: ${userId || 'Guest'} selected podcast ${id}`);
+
         res.json(resp.data);
     } catch (error) {
         console.error(error);
@@ -49,6 +52,9 @@ export const searchPodcasts = async (req: Request, res: Response) => {
                 params.len_min = Math.max(5, dur - 10); // 10 mins buffer, min 5 mins
             }
         }
+
+        const userId = (req as any).userId;
+        console.log(`User: ${userId || 'Guest'} searched for podcasts with query "${params.q}"`);
 
         const data = await getPodcasts(params);
         res.json(data);

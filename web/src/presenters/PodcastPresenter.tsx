@@ -12,8 +12,11 @@ export const PodcastPresenter = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+
         setLoading(true);
-        fetch(`/api/podcasts?duration=${duration}`)
+        fetch(`/api/podcasts?duration=${duration}`, { signal })
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch podcasts');
                 return res.json();
@@ -27,10 +30,13 @@ export const PodcastPresenter = () => {
                 setLoading(false);
             })
             .catch(err => {
+                if (err.name === 'AbortError') return;
                 console.error(err);
                 setError(err.message);
                 setLoading(false);
             });
+
+        return () => controller.abort();
     }, [duration]);
 
     return <PodcastView 

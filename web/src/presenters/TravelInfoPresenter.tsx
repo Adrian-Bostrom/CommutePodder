@@ -9,6 +9,7 @@ export const TravelInfoPresenter = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [recentTrips, setRecentTrips] = useState<RecentTrip[]>([]);
+    const [favoriteRoutes, setFavoriteRoutes] = useState<RecentTrip[]>([]);
 
     const [fromSearch, setFromSearch] = useState('');
     const [toSearch, setToSearch] = useState('');
@@ -31,8 +32,13 @@ export const TravelInfoPresenter = () => {
                 return null;
             })
             .then(user => {
-                if (user && user.routeHistory) {
-                    setRecentTrips(user.routeHistory);
+                if (user) {
+                    if (user.routeHistory) {
+                        setRecentTrips(user.routeHistory);
+                    }
+                    if (user.favouriteRoutes) {
+                        setFavoriteRoutes(user.favouriteRoutes);
+                    }
                 }
             })
             .catch(console.error);
@@ -95,19 +101,43 @@ export const TravelInfoPresenter = () => {
                 console.log("Received travel data:", data);
                 if (data && data.journeys) {
                     const mappedData = data.journeys.map((journey: any, index: number) => {
-                        const legs = journey.legs.map((leg: any) => {
-                            let timeDisplay = 'Unknown';
+                        const legs = journey.legs.map((leg: any, legIdx: number) => {
+                            let startTime = 'Unknown';
+                            let endTime = 'Unknown';
+
                             if (leg.origin && leg.origin.departureTimePlanned) {
                                 const date = new Date(leg.origin.departureTimePlanned);
-                                timeDisplay = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                startTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             }
+
+                            if (leg.destination && leg.destination.arrivalTimePlanned) {
+                                const date = new Date(leg.destination.arrivalTimePlanned);
+                                endTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+
+                            const timeDisplay = `${startTime} -> ${endTime}`;
+
+                            let waitTime = undefined;
+                            if (legIdx > 0) {
+                                const prevLeg = journey.legs[legIdx - 1];
+                                if (prevLeg.destination?.arrivalTimePlanned && leg.origin?.departureTimePlanned) {
+                                    const arrival = new Date(prevLeg.destination.arrivalTimePlanned).getTime();
+                                    const departure = new Date(leg.origin.departureTimePlanned).getTime();
+                                    const diffMins = Math.round((departure - arrival) / 60000);
+                                    if (diffMins > 0) {
+                                        waitTime = `${diffMins} min`;
+                                    }
+                                }
+                            }
+
                             return {
                                 line: leg.transportation?.disassembledName || leg.transportation?.name || 'Walk',
                                 destination: leg.destination?.name || 'Unknown',
                                 direction: leg.transportation?.destination?.name,
                                 time: timeDisplay,
                                 type: leg.transportation?.product?.name || 'Walk',
-                                origin: leg.origin?.name || 'Unknown'
+                                origin: leg.origin?.name || 'Unknown',
+                                waitTime
                             };
                         });
 
@@ -193,6 +223,29 @@ export const TravelInfoPresenter = () => {
         navigate('/podcasts', { state: { duration: minutes } });
     };
 
+    const handleToggleFavorite = async () => {
+        if (!selectedFrom || !selectedTo) return;
+        
+        try {
+            const res = await fetch('/api/users/favorites/routes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    startId: selectedFrom.id, 
+                    endId: selectedTo.id,
+                    startName: selectedFrom.name,
+                    endName: selectedTo.name
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setFavoriteRoutes(data.favoriteRoutes);
+            }
+        } catch (err) {
+            console.error("Failed to toggle favorite route", err);
+        }
+    };
+
     return <TravelInfoView 
         travelData={travelData} 
         loading={loading} 
@@ -213,5 +266,8 @@ export const TravelInfoPresenter = () => {
         onSelectTrip={handleSelectTrip}
         recentTrips={recentTrips}
         onSelectRecentTrip={handleSelectRecentTrip}
+        favoriteRoutes={favoriteRoutes}
+        onToggleFavorite={handleToggleFavorite}
+        isCurrentRouteFavorite={!!selectedFrom && !!selectedTo && favoriteRoutes.some(r => String(r.startId) === String(selectedFrom.id) && String(r.endId) === String(selectedTo.id))}
     />;
 };

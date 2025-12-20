@@ -13,13 +13,16 @@ export const PodcastDetailPresenter = () => {
     useEffect(() => {
         if (!id) return;
 
+        const controller = new AbortController();
+        const signal = controller.signal;
+
         setLoading(true);
         
         const fetchData = async () => {
             try {
                 const [episodeRes, userRes] = await Promise.all([
-                    fetch(`/api/podcasts?id=${id}`),
-                    fetch('/api/users/me')
+                    fetch(`/api/podcasts?id=${id}`, { signal }),
+                    fetch('/api/users/me', { signal })
                 ]);
 
                 if (!episodeRes.ok) throw new Error('Failed to fetch episode details');
@@ -34,14 +37,19 @@ export const PodcastDetailPresenter = () => {
                     }
                 }
             } catch (err: any) {
+                if (err.name === 'AbortError') return;
                 console.error(err);
                 setError(err.message);
             } finally {
-                setLoading(false);
+                if (!signal.aborted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchData();
+
+        return () => controller.abort();
     }, [id]);
 
     const handleToggleFavorite = async () => {
