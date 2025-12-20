@@ -20,6 +20,13 @@ export interface Stop {
     name: string;
 }
 
+export interface RecentTrip {
+    startId: string;
+    endId: string;
+    startName: string;
+    endName: string;
+}
+
 interface TravelInfoViewProps {
     travelData: TravelInfo[];
     loading: boolean;
@@ -41,6 +48,9 @@ interface TravelInfoViewProps {
     setSearchTime: (val: string) => void;
     onSearch: () => void;
     onSelectTrip: (trip: TravelInfo) => void;
+
+    recentTrips: RecentTrip[];
+    onSelectRecentTrip: (trip: RecentTrip) => void;
 }
 
 export const TravelInfoView = ({ 
@@ -48,7 +58,7 @@ export const TravelInfoView = ({
     fromSearch, setFromSearch, fromResults, onSelectFrom,
     toSearch, setToSearch, toResults, onSelectTo,
     searchDate, setSearchDate, searchTime, setSearchTime, onSearch,
-    onSelectTrip
+    onSelectTrip, recentTrips, onSelectRecentTrip
 }: TravelInfoViewProps) => {
     // if (loading) return <div className="p-4">Loading travel info...</div>; // Move loading inside to allow search while loading? Or just keep it simple.
     // If I return early, I can't see the search bar if it's loading initial data.
@@ -139,6 +149,34 @@ export const TravelInfoView = ({
 
             {loading && <div className="p-4">Loading travel info...</div>}
             {error && <div className="p-4 text-red-500">Error: {error}</div>}
+
+            {!loading && travelData.length === 0 && recentTrips.length > 0 && (
+                <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4">Recent Trips</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {recentTrips.slice().reverse().slice(0, 4).map((trip, index) => (
+                            <div 
+                                key={index} 
+                                className="bg-white p-4 rounded-lg shadow hover:shadow-md cursor-pointer border border-gray-200 transition-all hover:border-blue-300"
+                                onClick={() => onSelectRecentTrip(trip)}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                        <div className="font-medium text-gray-900">{trip.startName}</div>
+                                        <div className="text-gray-400 text-sm my-1">↓</div>
+                                        <div className="font-medium text-gray-900">{trip.endName}</div>
+                                    </div>
+                                    <div className="text-blue-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {!loading && !error && (
             <div className="space-y-4">

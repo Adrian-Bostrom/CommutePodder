@@ -1,4 +1,25 @@
 import { Request, Response } from 'express';
+import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Initialize Firebase Admin if not already initialized
+if (!admin.apps.length) {
+  try {
+    const serviceAccountPath = join(__dirname, '../../../serviceAccountKey.json');
+    const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+  } catch (error) {
+    console.error('Failed to initialize Firebase Admin:', error);
+  }
+}
 
 export const getTravelInfo = async (req: Request, res: Response) => {
     try {
@@ -11,6 +32,61 @@ export const getTravelInfo = async (req: Request, res: Response) => {
             date: date as string,
             time: time as string
         });
+
+        // Auto-save trip if user is logged in
+        const userId = (req as any).userId;
+        
+        if (userId && response && response.journeys && response.journeys.length > 0) {
+            try {
+                const firstTrip = response.journeys[0];
+                const legs = firstTrip.legs;
+                
+                if (legs && legs.length > 0) {
+                    // Find the actual start and end names from the trip details
+                    const firstLeg = legs[0];
+                    const lastLeg = legs[legs.length - 1];
+                    
+                    const startName = firstLeg.origin?.name || '';
+                    const endName = lastLeg.destination?.name || '';
+                    
+                    const db = admin.firestore();
+                    const userRef = db.collection('users').doc(userId);
+                    
+                    const trip = {
+                        startId: (originId as string),
+                        endId: (destId as string),
+                        startName,
+                        endName,
+                        timestamp: new Date()
+                    };
+
+                    // Update asynchronously with transaction to a limit of 5 most recent trips
+                    db.runTransaction(async (t) => {
+                        const doc = await t.get(userRef);
+                        if (!doc.exists) return;
+
+                        const userData = doc.data();
+                        let history = userData?.routeHistory || [];
+                        
+                        // Add new trip
+                        history.push(trip);
+                        
+                        // Keep only last 5
+                        if (history.length > 5) {
+                            history = history.slice(history.length - 5);
+                        }
+
+                        t.update(userRef, {
+                            routeHistory: history,
+                            currentRoute: { startId: originId, endId: destId }
+                        });
+                    }).catch(err => console.error("Failed to auto-save trip:", err));
+                }
+            } catch (err) {
+                console.error("Error processing auto-save trip:", err);
+            }
+        }
+
         console.log("made request", response)
         res.json(response);
     } catch (error) {

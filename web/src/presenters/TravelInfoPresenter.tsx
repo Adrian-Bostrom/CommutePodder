@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TravelInfoView } from '../views/TravelInfoView';
-import type { TravelInfo, Stop } from '../views/TravelInfoView';
+import type { TravelInfo, Stop, RecentTrip } from '../views/TravelInfoView';
 
 export const TravelInfoPresenter = () => {
     const navigate = useNavigate();
     const [travelData, setTravelData] = useState<TravelInfo[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [recentTrips, setRecentTrips] = useState<RecentTrip[]>([]);
 
     const [fromSearch, setFromSearch] = useState('');
     const [toSearch, setToSearch] = useState('');
@@ -21,6 +22,21 @@ export const TravelInfoPresenter = () => {
         const now = new Date();
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     });
+
+    // Fetch user data for recent trips
+    useEffect(() => {
+        fetch('/api/users/me')
+            .then(res => {
+                if (res.ok) return res.json();
+                return null;
+            })
+            .then(user => {
+                if (user && user.routeHistory) {
+                    setRecentTrips(user.routeHistory);
+                }
+            })
+            .catch(console.error);
+    }, []);
 
     // Search stops for Origin
     useEffect(() => {
@@ -68,74 +84,86 @@ export const TravelInfoPresenter = () => {
         return () => clearTimeout(timer);
     }, [toSearch, selectedTo]);
 
-    const handleSearch = () => {
-        if (selectedFrom && selectedTo) {
-            setLoading(true);
-            fetch(`/api/travel?originId=${selectedFrom.id}&destId=${selectedTo.id}&date=${searchDate}&time=${searchTime}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to fetch travel info');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Received travel data:", data);
-                    if (data && data.journeys) {
-                        const mappedData = data.journeys.map((journey: any, index: number) => {
-                            const legs = journey.legs.map((leg: any) => {
-                                let timeDisplay = 'Unknown';
-                                if (leg.origin && leg.origin.departureTimePlanned) {
-                                    const date = new Date(leg.origin.departureTimePlanned);
-                                    timeDisplay = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                }
-                                return {
-                                    line: leg.transportation?.disassembledName || leg.transportation?.name || 'Walk',
-                                    destination: leg.destination?.name || 'Unknown',
-                                    direction: leg.transportation?.destination?.name,
-                                    time: timeDisplay,
-                                    type: leg.transportation?.product?.name || 'Walk',
-                                    origin: leg.origin?.name || 'Unknown'
-                                };
-                            });
-
-                            // Calculate total duration or start/end time
-                            const firstLeg = journey.legs[0];
-                            const lastLeg = journey.legs[journey.legs.length - 1];
-                            
-                            const startTime = firstLeg.origin?.departureTimePlanned 
-                                ? new Date(firstLeg.origin.departureTimePlanned).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                : 'Unknown';
-                                
-                            const endTime = lastLeg.destination?.arrivalTimePlanned
-                                ? new Date(lastLeg.destination.arrivalTimePlanned).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                : 'Unknown';
-
-                            // Simple duration calculation if needed, or just show start-end
-                            let duration = 'Unknown';
-                            if (firstLeg.origin?.departureTimePlanned && lastLeg.destination?.arrivalTimePlanned) {
-                                const start = new Date(firstLeg.origin.departureTimePlanned).getTime();
-                                const end = new Date(lastLeg.destination.arrivalTimePlanned).getTime();
-                                const diffMins = Math.round((end - start) / 60000);
-                                duration = `${Math.floor(diffMins / 60)}h ${diffMins % 60}m`;
+    const performSearch = (originId: string, destId: string) => {
+        setLoading(true);
+        fetch(`/api/travel?originId=${originId}&destId=${destId}&date=${searchDate}&time=${searchTime}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch travel info');
+                return response.json();
+            })
+            .then(data => {
+                console.log("Received travel data:", data);
+                if (data && data.journeys) {
+                    const mappedData = data.journeys.map((journey: any, index: number) => {
+                        const legs = journey.legs.map((leg: any) => {
+                            let timeDisplay = 'Unknown';
+                            if (leg.origin && leg.origin.departureTimePlanned) {
+                                const date = new Date(leg.origin.departureTimePlanned);
+                                timeDisplay = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             }
-
                             return {
-                                id: index,
-                                startTime,
-                                endTime,
-                                duration,
-                                legs
+                                line: leg.transportation?.disassembledName || leg.transportation?.name || 'Walk',
+                                destination: leg.destination?.name || 'Unknown',
+                                direction: leg.transportation?.destination?.name,
+                                time: timeDisplay,
+                                type: leg.transportation?.product?.name || 'Walk',
+                                origin: leg.origin?.name || 'Unknown'
                             };
                         });
-                        setTravelData(mappedData);
-                    } else {
-                        setTravelData([]);
-                    }
-                    setLoading(false);
-                })
-                .catch(err => {
-                    setError(err.message);
-                    setLoading(false);
-                });
+
+                        // Calculate total duration or start/end time
+                        const firstLeg = journey.legs[0];
+                        const lastLeg = journey.legs[journey.legs.length - 1];
+                        
+                        const startTime = firstLeg.origin?.departureTimePlanned 
+                            ? new Date(firstLeg.origin.departureTimePlanned).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            : 'Unknown';
+                            
+                        const endTime = lastLeg.destination?.arrivalTimePlanned
+                            ? new Date(lastLeg.destination.arrivalTimePlanned).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            : 'Unknown';
+
+                        // Simple duration calculation if needed, or just show start-end
+                        let duration = 'Unknown';
+                        if (firstLeg.origin?.departureTimePlanned && lastLeg.destination?.arrivalTimePlanned) {
+                            const start = new Date(firstLeg.origin.departureTimePlanned).getTime();
+                            const end = new Date(lastLeg.destination.arrivalTimePlanned).getTime();
+                            const diffMins = Math.round((end - start) / 60000);
+                            duration = `${Math.floor(diffMins / 60)}h ${diffMins % 60}m`;
+                        }
+
+                        return {
+                            id: index,
+                            startTime,
+                            endTime,
+                            duration,
+                            legs
+                        };
+                    });
+                    setTravelData(mappedData);
+                } else {
+                    setTravelData([]);
+                }
+                setLoading(false);
+            })
+            .catch(err => {
+                setError(err.message);
+                setLoading(false);
+            });
+    };
+
+    const handleSearch = () => {
+        if (selectedFrom && selectedTo) {
+            performSearch(selectedFrom.id, selectedTo.id);
         }
+    };
+
+    const handleSelectRecentTrip = (trip: RecentTrip) => {
+        setSelectedFrom({ id: trip.startId, name: trip.startName });
+        setFromSearch(trip.startName);
+        setSelectedTo({ id: trip.endId, name: trip.endName });
+        setToSearch(trip.endName);
+        performSearch(trip.startId, trip.endId);
     };
 
     const handleSelectFrom = (stop: Stop) => {
@@ -183,5 +211,7 @@ export const TravelInfoPresenter = () => {
         setSearchTime={setSearchTime}
         onSearch={handleSearch}
         onSelectTrip={handleSelectTrip}
+        recentTrips={recentTrips}
+        onSelectRecentTrip={handleSelectRecentTrip}
     />;
 };

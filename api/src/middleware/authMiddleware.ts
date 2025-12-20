@@ -25,3 +25,22 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     res.status(401).json({ message: 'Invalid token' });
   }
 };
+
+export const optionalAuthenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.cookies.jwt;
+
+  if (!token) {
+    next();
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    (req as any).userId = decoded.userId;
+  } catch (error) {
+    // Ignore error for optional auth
+    console.log('Optional JWT verification failed:', error);
+  }
+  next();
+};
+

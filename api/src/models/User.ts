@@ -5,9 +5,9 @@ export class User {
   picture?: string;
   favouritePods: string[];
   currentPod: number;
-  routeHistory: {startId: number, endId: number}[];
-  currentRoute: {startId: number, endId: number};
-  favouriteRoutes: {startId: number, endId: number}[];
+  routeHistory: {startId: string, endId: string, startName: string, endName: string}[];
+  currentRoute: {startId: string, endId: string};
+  favouriteRoutes: {startId: string, endId: string}[];
   createdAt: Date;
   lastLogin: Date;
 
@@ -18,9 +18,9 @@ export class User {
     picture?: string,
     favouritePods?:  string[],
     currentPod?: number,
-    routeHistory?: {startId: number, endId: number}[],
-    currentRoute?: {startId: number, endId: number},
-    favouriteRoutes?: {startId: number, endId: number}[],
+    routeHistory?: {startId: string, endId: string, startName: string, endName: string}[],
+    currentRoute?: {startId: string, endId: string},
+    favouriteRoutes?: {startId: string, endId: string}[],
     createdAt?: Date,
     lastLogin?: Date
   }) {
@@ -31,7 +31,7 @@ export class User {
     this.favouritePods = data.favouritePods || [];
     this.currentPod = data.currentPod || 0;
     this.routeHistory = data.routeHistory || [];
-    this.currentRoute = data.currentRoute || {startId: 0, endId: 0};
+    this.currentRoute = data.currentRoute || {startId: "", endId: ""};
     this.favouriteRoutes = data.favouriteRoutes || [];
     this.createdAt = data.createdAt || new Date();
     this.lastLogin = data.lastLogin || new Date();
