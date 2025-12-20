@@ -149,3 +149,31 @@ export const toggleFavoriteRoute = async (req: Request, res: Response) => {
     }
 };
 
+export const updateCurrentPod = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).userId;
+        const { podcastId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        if (!podcastId) {
+            return res.status(400).json({ error: 'Podcast ID is required' });
+        }
+
+        const db = admin.firestore();
+        const userRef = db.collection('users').doc(userId);
+        
+        await userRef.update({
+            currentPod: podcastId
+        });
+
+        console.log(`User: ${userId} updated current pod to ${podcastId}`);
+
+        res.json({ success: true, currentPod: podcastId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update current pod' });
+    }
+};
+

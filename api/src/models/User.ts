@@ -4,7 +4,7 @@ export class User {
   name: string;
   picture?: string;
   favouritePods: string[];
-  currentPod: number;
+  currentPod: string;
   routeHistory: {startId: string, endId: string, startName: string, endName: string}[];
   currentRoute: {startId: string, endId: string};
   favouriteRoutes: {startId: string, endId: string}[];
@@ -17,7 +17,7 @@ export class User {
     name: string,
     picture?: string,
     favouritePods?:  string[],
-    currentPod?: number,
+    currentPod?: string,
     routeHistory?: {startId: string, endId: string, startName: string, endName: string}[],
     currentRoute?: {startId: string, endId: string},
     favouriteRoutes?: {startId: string, endId: string}[],
@@ -29,7 +29,7 @@ export class User {
     this.name = data.name;
     this.picture = data.picture;
     this.favouritePods = data.favouritePods || [];
-    this.currentPod = data.currentPod || 0;
+    this.currentPod = data.currentPod || "";
     this.routeHistory = data.routeHistory || [];
     this.currentRoute = data.currentRoute || {startId: "", endId: ""};
     this.favouriteRoutes = data.favouriteRoutes || [];
@@ -37,13 +37,13 @@ export class User {
     this.lastLogin = data.lastLogin || new Date();
   }
 
-  setFavourite(podId: number): void {
+  setFavourite(podId: string): void {
     if (!this.favouritePods.includes(podId)) {
       this.favouritePods.push(podId);
     }
   }
 
-  removeFavourite(podId: number): void {
+  removeFavourite(podId: string): void {
     this.favouritePods = this.favouritePods.filter(id => id !== podId);
   }
 

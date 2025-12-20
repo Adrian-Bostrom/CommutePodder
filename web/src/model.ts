@@ -6,8 +6,8 @@ export interface RouteType {
 
 export interface UserData {
   uid:  number;
-  favouritePods: number[];
-  currentPod: number;
+  favouritePods: string[];
+  currentPod: string;
   routeHistory: RouteType[];
   currentRoute: RouteType;
   favouriteRoutes: RouteType[];
@@ -16,8 +16,8 @@ export interface UserData {
 
 export class User {
   uid: number;
-  favouritePods:  number[];
-  currentPod:  number;
+  favouritePods:  string[];
+  currentPod:  string;
   routeHistory:  RouteType[];
   currentRoute: RouteType;
   favouriteRoutes: RouteType[];
@@ -26,7 +26,7 @@ export class User {
   constructor(data:  Partial<UserData> & { uid: number }) {
     this.uid = data.uid;
     this.favouritePods = data.favouritePods || [];
-    this.currentPod = data.currentPod || 0;
+    this.currentPod = data.currentPod || "";
     this.routeHistory = data.routeHistory || [];
     this.currentRoute = data.currentRoute || { startId: 0, endId: 0 };
     this.favouriteRoutes = data.favouriteRoutes || [];
@@ -34,24 +34,24 @@ export class User {
   }
 
   // Add a pod to favourites
-  addFavouritePod(podId:  number): void {
+  addFavouritePod(podId:  string): void {
     if (!this.favouritePods. includes(podId)) {
       this.favouritePods.push(podId);
     }
   }
 
   // Remove a pod from favourites
-  removeFavouritePod(podId:  number): void {
+  removeFavouritePod(podId:  string): void {
     this.favouritePods = this.favouritePods.filter(id => id !== podId);
   }
 
   // Check if a pod is favourited
-  isFavouritePod(podId: number): boolean {
+  isFavouritePod(podId: string): boolean {
     return this. favouritePods.includes(podId);
   }
 
   // Set current pod
-  setCurrentPod(podId: number): void {
+  setCurrentPod(podId: string): void {
     this.currentPod = podId;
   }
 

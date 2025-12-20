@@ -24,9 +24,11 @@ interface PodcastDetailViewProps {
   error: string | null;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onSelectPod: () => void;
+  isCurrentPod: boolean;
 }
 
-export const PodcastDetailView: React.FC<PodcastDetailViewProps> = ({ episode, loading, error, isFavorite, onToggleFavorite }) => {
+export const PodcastDetailView: React.FC<PodcastDetailViewProps> = ({ episode, loading, error, isFavorite, onToggleFavorite, onSelectPod, isCurrentPod }) => {
   if (loading) return <div className="p-4 text-center">Loading episode details...</div>;
   if (error) return <div className="p-4 text-red-500 text-center">Error: {error}</div>;
   if (!episode) return <div className="p-4 text-center">Episode not found</div>;
@@ -57,12 +59,27 @@ export const PodcastDetailView: React.FC<PodcastDetailViewProps> = ({ episode, l
                 <div className="mt-4 text-gray-600 prose max-w-none" dangerouslySetInnerHTML={{ __html: episode.description }} />
             </div>
             
-            <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Listen Now</h3>
-                <audio controls className="w-full">
-                    <source src={episode.audio} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                </audio>
+            <div className="mt-6 flex items-center gap-4">
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-2">Listen Now</h3>
+                    <audio controls className="w-full">
+                        <source src={episode.audio} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div>
+                    <button
+                        onClick={onSelectPod}
+                        disabled={isCurrentPod}
+                        className={`px-6 py-3 rounded-lg font-bold shadow transition-colors ${
+                            isCurrentPod 
+                            ? 'bg-green-100 text-green-800 cursor-default' 
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                        }`}
+                    >
+                        {isCurrentPod ? 'Currently Selected' : 'Select for Commute'}
+                    </button>
+                </div>
             </div>
             
             <div className="mt-4 text-right">

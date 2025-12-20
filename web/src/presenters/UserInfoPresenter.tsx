@@ -11,17 +11,19 @@ export const UserInfoPresenter = () =>  {
         const fetchUser = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('/api/users');
+                const response = await fetch('/api/users/me');
                 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Not authenticated');
+                    }
                     throw new Error('Failed to fetch user data');
                 }
                 
                 const userData = await response.json();
                 
-                // The API returns an array, so get the first user
-                if (Array.isArray(userData) && userData.length > 0) {
-                    const userInstance = User.fromJSON(userData[0]);
+                if (userData) {
+                    const userInstance = User.fromJSON(userData);
                     setUser(userInstance);
                 } else {
                     setError('No user data available');

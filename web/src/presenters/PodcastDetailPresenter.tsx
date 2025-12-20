@@ -9,6 +9,7 @@ export const PodcastDetailPresenter = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isCurrentPod, setIsCurrentPod] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -31,9 +32,13 @@ export const PodcastDetailPresenter = () => {
 
                 if (userRes.ok) {
                     const userData = await userRes.json();
-                    if (userData && userData.favouritePods) {
-                        // Ensure we compare strings
-                        setIsFavorite(userData.favouritePods.includes(id));
+                    if (userData) {
+                        if (userData.favouritePods) {
+                            setIsFavorite(userData.favouritePods.includes(id));
+                        }
+                        if (userData.currentPod) {
+                            setIsCurrentPod(String(userData.currentPod) === String(id));
+                        }
                     }
                 }
             } catch (err: any) {
@@ -51,6 +56,30 @@ export const PodcastDetailPresenter = () => {
 
         return () => controller.abort();
     }, [id]);
+
+    const handleSelectPod = async () => {
+        if (!id) return;
+
+        try {
+            const res = await fetch('/api/users/current-pod', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ podcastId: id })
+            });
+
+            if (res.status === 401) {
+                alert("Please login to select a podcast");
+                return;
+            }
+
+            const data = await res.json();
+            if (data.success) {
+                setIsCurrentPod(true);
+            }
+        } catch (err) {
+            console.error("Failed to select podcast", err);
+        }
+    };
 
     const handleToggleFavorite = async () => {
         if (!id) return;
@@ -83,5 +112,7 @@ export const PodcastDetailPresenter = () => {
         error={error} 
         isFavorite={isFavorite}
         onToggleFavorite={handleToggleFavorite}
+        onSelectPod={handleSelectPod}
+        isCurrentPod={isCurrentPod}
     />;
 };

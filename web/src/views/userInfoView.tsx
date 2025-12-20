@@ -4,10 +4,10 @@ interface UserViewProps {
     user: User | null;
     loading: boolean;
     error: string | null;
-    onAddFavouritePod?:  (podId: number) => void;
-    onRemoveFavouritePod?:  (podId: number) => void;
+    onAddFavouritePod?:  (podId: string) => void;
+    onRemoveFavouritePod?:  (podId: string) => void;
     onToggleReady?: () => void;
-    onSetCurrentPod?:  (podId: number) => void;
+    onSetCurrentPod?:  (podId: string) => void;
 }
 
 export const UserView = ({ 
@@ -63,17 +63,17 @@ export const UserView = ({
                     <span className="text-sm font-semibold text-gray-600 uppercase block mb-2">Current Pod</span>
                     <div className="flex items-center gap-3">
                         <span className="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-lg text-lg font-bold">
-                            Pod {user.currentPod}
+                            {user.currentPod ? `Pod ${user.currentPod}` : 'No Pod Selected'}
                         </span>
                         {onSetCurrentPod && (
                             <input
-                                type="number"
-                                placeholder="Change pod..."
+                                type="text"
+                                placeholder="Change pod ID..."
                                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                 onKeyPress={(e) => {
                                     if (e.key === 'Enter') {
-                                        const value = parseInt((e.target as HTMLInputElement).value);
-                                        if (! isNaN(value)) {
+                                        const value = (e.target as HTMLInputElement).value;
+                                        if (value) {
                                             onSetCurrentPod(value);
                                             (e.target as HTMLInputElement).value = '';
                                         }
