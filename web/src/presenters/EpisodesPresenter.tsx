@@ -8,6 +8,7 @@ export const EpisodesPresenter = () => {
     const [recommendedEpisodes, setRecommendedEpisodes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -19,8 +20,17 @@ export const EpisodesPresenter = () => {
                 
                 // 1. Fetch User
                 const userRes = await fetch('/api/users/me', { signal });
+                
+                if (userRes.status === 401 || userRes.status === 403) {
+                    setIsLoggedIn(false);
+                    setLoading(false);
+                    return;
+                }
+
                 if (!userRes.ok) throw new Error('Failed to fetch user profile');
+                
                 const user = await userRes.json();
+                setIsLoggedIn(true);
 
                 const promises = [];
 
@@ -87,5 +97,6 @@ export const EpisodesPresenter = () => {
         recommendedEpisodes={recommendedEpisodes}
         loading={loading}
         error={error}
+        isLoggedIn={isLoggedIn}
     />;
 };

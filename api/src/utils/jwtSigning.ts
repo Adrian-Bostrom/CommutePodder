@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "1h";
 
 const generateJWT = (res: Response, userId: string) => {
-  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRY } as jwt.SignOptions);
 
   res.cookie("jwt", token, {
     httpOnly: true,

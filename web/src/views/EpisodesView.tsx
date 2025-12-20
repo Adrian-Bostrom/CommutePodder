@@ -8,6 +8,7 @@ interface EpisodesViewProps {
     recommendedEpisodes: any[]; // Using any for now as search results have slightly different shape than details
     loading: boolean;
     error: string | null;
+    isLoggedIn: boolean;
 }
 
 export const EpisodesView: React.FC<EpisodesViewProps> = ({ 
@@ -15,7 +16,8 @@ export const EpisodesView: React.FC<EpisodesViewProps> = ({
     likedEpisodes, 
     recommendedEpisodes, 
     loading, 
-    error 
+    error,
+    isLoggedIn
 }) => {
     if (loading && !currentEpisode && likedEpisodes.length === 0) {
         return <div className="p-8 text-center">Loading your episodes...</div>;
@@ -23,6 +25,43 @@ export const EpisodesView: React.FC<EpisodesViewProps> = ({
 
     if (error) {
         return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <div className="p-8 text-center max-w-2xl mx-auto mt-10 bg-white rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">Please Log In</h2>
+                <p className="text-gray-600 mb-6">
+                    You need to be logged in to view your saved episodes and listening history.
+                </p>
+                <Link 
+                    to="/" 
+                    className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                >
+                    Go to Login
+                </Link>
+            </div>
+        );
+    }
+
+    if (!currentEpisode && likedEpisodes.length === 0) {
+        return (
+            <div className="p-8 text-center max-w-2xl mx-auto mt-10 bg-white rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">No Episodes Yet</h2>
+                <p className="text-gray-600 mb-6">
+                    You haven't saved any episodes or started listening to any podcasts yet.
+                </p>
+                <p className="text-gray-600 mb-6">
+                    Plan a trip to find the perfect podcast for your commute!
+                </p>
+                <Link 
+                    to="/travel" 
+                    className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                >
+                    Plan a Trip
+                </Link>
+            </div>
+        );
     }
 
     return (

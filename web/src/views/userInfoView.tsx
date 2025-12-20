@@ -97,8 +97,8 @@ export const UserView = ({
                                 className="px-3 py-1 border border-gray-300 rounded text-sm w-32"
                                 onKeyPress={(e) => {
                                     if (e.key === 'Enter') {
-                                        const value = parseInt((e.target as HTMLInputElement).value);
-                                        if (!isNaN(value)) {
+                                        const value = (e.target as HTMLInputElement).value;
+                                        if (value) {
                                             onAddFavouritePod(value);
                                             (e.target as HTMLInputElement).value = '';
                                         }

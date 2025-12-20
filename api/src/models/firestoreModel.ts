@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import { User } from "./User";
+import { User } from "./User.js";
+// @ts-ignore
 import { firebaseConfig } from "../firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
@@ -169,7 +170,7 @@ export async function getUsers(): Promise<User[]> {
  * @param uid - The user ID to fetch
  * @returns Promise<User | null>
  */
-export async function getUserByUid(uid: number): Promise<User | null> {
+export async function getUserByUid(uid: string): Promise<User | null> {
   try {
     const users = await getUsers();
     const user = users.find(u => u.uid === uid);
@@ -182,17 +183,18 @@ export async function getUserByUid(uid: number): Promise<User | null> {
 
 
 const newUser = new User({
-  uid: 12345,
-  favouritePods: [1, 2, 3],
-  currentPod: 1,
+  uid: "12345",
+  email: "test@test.com",
+  name: "Test User",
+  favouritePods: ["1", "2", "3"],
+  currentPod: "1",
   routeHistory: [
-    { startId: 10, endId: 20 },
-    { startId: 20, endId: 30 }
+    { startId: "10", endId: "20", startName: "Start", endName: "End" },
+    { startId: "20", endId: "30", startName: "Start", endName: "End" }
   ],
-  currentRoute:  { startId: 10, endId: 20 },
+  currentRoute:  { startId: "10", endId: "20" },
   favouriteRoutes: [
-    { startId: 10, endId: 20 }
+    { startId: "10", endId: "20" }
   ],
-  ready: false
 });
 
