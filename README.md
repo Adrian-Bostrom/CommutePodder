@@ -21,7 +21,11 @@ CommutePodder helps commuters discover podcasts that fit their travel time. User
 - ✅ Error handling middleware
 - ✅ SL API integration preparation
 - ✅ MVC architecture (Models, Controllers, Services, Routes)
-
+- ✅ Complete SL API integration for route calculation
+- ✅ Integrate podcast API (ListenNotes or similar)
+- ✅ Implement podcast recommendation algorithm based on travel time
+- ✅ Store user preferences and route history in Firestore
+- ✅ Route history tracking
 ### Frontend
 - ✅ React + Vite setup with TypeScript
 - ✅ Tailwind CSS for styling
@@ -31,6 +35,9 @@ CommutePodder helps commuters discover podcasts that fit their travel time. User
 - ✅ Navbar component
 - ✅ Firebase client SDK integration
 - ✅ Environment configuration
+- ✅ Create podcast display/player interface
+- ✅ Favouriting podcast works
+- ✅ Display recent routes
 
 ### DevOps
 - ✅ Monorepo structure with separate frontend/backend
@@ -42,23 +49,16 @@ CommutePodder helps commuters discover podcasts that fit their travel time. User
 ## Remaining Work
 
 ### High Priority
-- ⏳ Complete SL API integration for route calculation
-- ⏳ Integrate podcast API (ListenNotes or similar)
-- ⏳ Implement podcast recommendation algorithm based on travel time
-- ⏳ Create podcast display/player interface
-- ⏳ Store user preferences and route history in Firestore
-- ⏳ Add favorite routes and podcasts functionality
+- ⏳ Add favorite routes functionality
 
 ### Medium Priority
 - ⏳ User profile management
-- ⏳ Route history tracking
 - ⏳ Podcast playback controls
 - ⏳ Responsive mobile design improvements
 - ⏳ Loading states and error handling in UI
 
 ### Low Priority
 - ⏳ Deploy backend to production
-- ⏳ CI/CD pipeline
 
 ## Project Structure
 
