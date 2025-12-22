@@ -3,6 +3,23 @@ import { Request, Response } from 'express';
 
 const BASE_URL = 'https://listen-api.listennotes.com/api/v2/search';
 const EPISODE_URL = 'https://listen-api.listennotes.com/api/v2/episodes';
+const GENRES_URL = 'https://listen-api.listennotes.com/api/v2/genres';
+
+export const getGenres = async (req: Request, res: Response) => {
+    try {
+        const apiKey = process.env.LISTENNOTES_API_KEY;
+        const resp = await axios.get(GENRES_URL, {
+            headers: {
+                'X-ListenAPI-Key': apiKey ?? '',
+                Accept: 'application/json',
+            },
+        });
+        res.json(resp.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch genres' });
+    }
+};
 
 export const getEpisode = async (req: Request, res: Response) => {
     const { id } = req.query;
@@ -34,7 +51,7 @@ export const getEpisode = async (req: Request, res: Response) => {
 
 export const searchPodcasts = async (req: Request, res: Response) => {
     try {
-        const { q, duration } = req.query;
+        const { q, duration, genre_ids } = req.query;
 
         
         const params: SearchParams = {
@@ -51,6 +68,10 @@ export const searchPodcasts = async (req: Request, res: Response) => {
                 params.len_max = dur;
                 params.len_min = Math.max(5, dur - 10); // 10 mins buffer, min 5 mins
             }
+        }
+
+        if (genre_ids) {
+            params.genre_ids = genre_ids as string;
         }
 
         const userId = (req as any).userId;

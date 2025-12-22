@@ -10,7 +10,7 @@ const JWT_EXPIRY = process.env.JWT_EXPIRY || "1h";
 const generateJWT = (res: Response, userId: string) => {
   const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRY } as jwt.SignOptions);
 
-  res.cookie("jwt", token, {
+  res.cookie("__session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -20,7 +20,7 @@ const generateJWT = (res: Response, userId: string) => {
 };
 
 const clearJWT = (res: Response) => {
-  res.cookie("jwt", "", {
+  res.cookie("__session", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",

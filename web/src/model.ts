@@ -1,4 +1,10 @@
 
+export interface Genre {
+  id: number;
+  name: string;
+  parent_id: number;
+}
+
 export interface RouteType {
   startId: number;
   endId: number;

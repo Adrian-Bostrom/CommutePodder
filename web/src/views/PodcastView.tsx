@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import type { Genre } from '../model';
 
 export interface PodcastEpisode {
     id: string;
@@ -18,15 +19,46 @@ interface PodcastViewProps {
     loading: boolean;
     error: string | null;
     targetDuration: number;
+    genres: Genre[];
+    selectedGenre: string;
+    onSelectGenre: (id: string) => void;
 }
 
-export const PodcastView = ({ podcasts, loading, error, targetDuration }: PodcastViewProps) => {
+export const PodcastView = ({ 
+    podcasts, 
+    loading, 
+    error, 
+    targetDuration,
+    genres,
+    selectedGenre,
+    onSelectGenre
+}: PodcastViewProps) => {
     return (
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Recommended Podcasts</h2>
-            <p className="mb-4 text-gray-600">
-                Finding episodes around {targetDuration} minutes for your trip.
-            </p>
+            
+            <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
+                <p className="text-gray-600">
+                    Finding episodes around {targetDuration} minutes for your trip.
+                </p>
+                
+                <div className="flex items-center gap-2">
+                    <label htmlFor="genre-select" className="font-medium text-gray-700">Category:</label>
+                    <select
+                        id="genre-select"
+                        value={selectedGenre}
+                        onChange={(e) => onSelectGenre(e.target.value)}
+                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="">All Categories</option>
+                        {genres.map(genre => (
+                            <option key={genre.id} value={genre.id}>
+                                {genre.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
             {loading && <div className="p-4">Loading podcasts...</div>}
             {error && <div className="p-4 text-red-500">Error: {error}</div>}

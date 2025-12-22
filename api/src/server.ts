@@ -9,7 +9,10 @@ import routes from './routes/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Try loading from root .env (local dev)
 dotenv.config({ path: join(__dirname, '../../.env') });
+// Try loading from api/.env (production/deployment)
+dotenv.config({ path: join(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;

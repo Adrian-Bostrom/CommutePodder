@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import { searchPodcasts, getEpisode } from '../controllers/PodcastController.js';
+import { searchPodcasts, getEpisode, getGenres } from '../controllers/PodcastController.js';
 import { optionalAuthenticateJWT } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
 router.use(optionalAuthenticateJWT);
+
+router.get('/genres', getGenres);
 
 router.get('/', (req, res, next) => {
     if (req.query.id) {

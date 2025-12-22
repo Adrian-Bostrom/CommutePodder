@@ -8,7 +8,7 @@ interface JWTPayload {
 }
 
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies.jwt;
+  const token = req.cookies.__session;
 
   if (!token) {
     console.log('No JWT token found');
@@ -27,7 +27,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 };
 
 export const optionalAuthenticateJWT = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies.jwt;
+  const token = req.cookies.__session;
 
   if (!token) {
     next();

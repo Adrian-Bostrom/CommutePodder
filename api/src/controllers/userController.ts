@@ -17,7 +17,8 @@ if (!admin.apps.length) {
       credential: admin.credential.cert(serviceAccount)
     });
   } catch (error) {
-    console.error('Failed to initialize Firebase Admin:', error);
+    console.error('Failed to initialize Firebase Admin with service account, falling back to default:', error);
+    admin.initializeApp();
   }
 }
 

@@ -26,9 +26,6 @@ export function NavbarView({ isMenuOpen, toggleMenu }: NavbarViewProps) {
                         <Link to="/episodes" className="text-gray-600 hover:text-gray-900">
                             Episodes
                         </Link>
-                        <Link to="/profile" className="text-gray-600 hover:text-gray-900">
-                            Profile
-                        </Link>
                     </div>
                     
                     <div className="md:hidden">
