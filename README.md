@@ -8,6 +8,78 @@ A web application that recommends podcasts based on your commute time in Stockho
 
 CommutePodder helps commuters discover podcasts that fit their travel time. Users authenticate via Google, select their start and end stations within Stockholm's public transport network, and receive personalized podcast recommendations based on the calculated travel duration. The app uses the SL API for travel information and integrates with podcast services to provide relevant content suggestions.
 
+## Setup Guide
+
+### Prerequisites
+- Node.js (v18 or later recommended)
+- npm
+- A Firebase project
+- A ListenNotes API key
+- Trafiklab (SL) API keys
+
+### Installation
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd CommutePodder
+   ```
+
+2. **Install Dependencies**
+   Run the following commands to install dependencies for the root, API, and Web workspaces:
+   ```bash
+   npm install
+   cd api && npm install
+   cd ../web && npm install
+   cd ..
+   ```
+
+3. **Configuration**
+   You need to create 4 configuration files.
+
+   **A. Root Environment Variables (`.env`)**
+   Create a `.env` file in the root directory based on `.env.example`:
+   ```ini
+   PORT=3000
+   FRONTEND_URL=http://localhost:5173
+   LISTENNOTES_API_KEY=your_listennotes_api_key
+   ```
+
+   **B. Web Environment Variables (`web/.env`)**
+   Create a `.env` file in the `web` directory based on `web/.env.example` with your Firebase config:
+   ```ini
+   VITE_FIREBASE_API_KEY=...
+   VITE_FIREBASE_AUTH_DOMAIN=...
+   # ... other firebase config
+   ```
+
+   **C. Firebase Service Account (`serviceAccountKey.json`)**
+   Generate a new private key from Firebase Console > Project Settings > Service Accounts, and save it as `serviceAccountKey.json` in the **root** directory.
+
+   **D. API Firebase Config (`api/src/firebaseConfig.js`)**
+   Create `api/src/firebaseConfig.js` based on `api/src/firebaseConfig.js.example` with your Firebase config (same values as web/.env but in JS object format).
+
+4. **Running the Application**
+   From the root directory, run:
+   ```bash
+   npm run dev
+   ```
+   This will start both the backend (port 3000) and frontend (port 5173) concurrently.
+
+## Third-Party Components
+
+### Frameworks & Libraries
+- **React**: Used for building the user interface.
+- **Express.js**: Used for the backend REST API.
+- **Firebase**: Used for Authentication (Google Sign-In), Database (Firestore), and Hosting.
+- **Tailwind CSS**: Used for styling the application.
+- **React Router**: Used for client-side routing.
+- **Vite**: Build tool and development server.
+- **Axios**: Used for making HTTP requests to external APIs.
+
+### External APIs
+- **SL API (Trafiklab)**: Used to fetch real-time public transport routes and stop data in Stockholm.
+- **ListenNotes API**: Used to search for podcasts and episodes based on duration and genre.
+
 ## Completed Features
 
 ### Backend
@@ -38,6 +110,11 @@ CommutePodder helps commuters discover podcasts that fit their travel time. User
 - ✅ Create podcast display/player interface
 - ✅ Favouriting podcast works
 - ✅ Display recent routes
+- ✅ Favorite routes functionality
+- ✅ User profile management
+- ✅ Responsive mobile design (Sidebar menu)
+- ✅ Podcast category filtering
+- ✅ Loading states and error handling
 
 ### DevOps
 - ✅ Monorepo structure with separate frontend/backend
@@ -45,20 +122,16 @@ CommutePodder helps commuters discover podcasts that fit their travel time. User
 - ✅ TypeScript configuration for both projects
 - ✅ Git ignore files properly configured
 - ✅ Environment variable management
+- ✅ Deploy backend to production (Firebase Functions)
+- ✅ Deploy frontend to production (Firebase Hosting)
 
-## Remaining Work
+## Future Enhancements
 
-### High Priority
-- ⏳ Add favorite routes functionality
-
-### Medium Priority
-- ⏳ User profile management
-- ⏳ Podcast playback controls
-- ⏳ Responsive mobile design improvements
-- ⏳ Loading states and error handling in UI
-
-### Low Priority
-- ⏳ Deploy backend to production
+- ⏳ Advanced podcast filtering (language, region)
+- ⏳ Persistent in-app audio player across navigation
+- ⏳ Offline support (PWA)
+- ⏳ Unit and Integration tests
+- ⏳ Social features (share routes/podcasts)
 
 ## Project Structure
 
@@ -123,7 +196,7 @@ CommutePodder/
 
 ### APIs
 - **SL API** - Stockholm public transport data
-- **ListenNotes API** (planned) - Podcast search and metadata
+- **ListenNotes API** - Podcast search and metadata
 
 ## Getting Started
 
